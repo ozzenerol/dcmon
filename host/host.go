@@ -111,6 +111,37 @@ func Status(hosts []Host, args []string) error {
 	return errors.Join(errs...)
 }
 
+func StatusByHostname(hosts []Host, hostname string) error {
+	if hostname == "" {
+		return fmt.Errorf("`hostname` cannot be empty")
+	}
+
+	var host Host
+	var found bool
+
+	for i, h := range hosts {
+		if h.Hostname == hosts[i].Hostname {
+			host = hosts[i]
+			found = true
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("%s does not exist", hostname)
+	}
+
+	printHeader()
+	
+	rowResult, err := collect(host)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	printRow(rowResult)
+
+	return nil
+}
+
 func filterByType(hosts []Host, hostType string) ([]Host){
 	var retHosts []Host
 	for _, h := range hosts {
@@ -222,8 +253,7 @@ func printRow(row HostTable) {
 }
 
 func print(rows []HostTable) {
-  w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-  //fmt.Fprintln(w, "HOSTNAME\tUPTIME\tCPU\tMEM\tGPU\tCONTAINERS\t")
+  w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0) 
   for _, r := range rows {
     gpu := r.GPU
     if gpu == "" {

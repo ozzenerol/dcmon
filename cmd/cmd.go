@@ -18,6 +18,7 @@ const (
 
 	CommandExit					= "exit"
 	CommandStatus				= "status"
+	FlagHostname			  = "-h"
 )
 
 type CmdConfig struct {
@@ -86,7 +87,14 @@ func Execute(config CmdConfig) {
 			if after, ok := strings.CutPrefix(command, CommandStatus); ok {
 				args = strings.Fields(after)
 			}
-			err = host.Status(hosts, args)
+			
+			var err error
+			if len(args) > 0 && args[0] == FlagHostname {
+				err = host.StatusByHostname(hosts, args[1])
+			} else {
+				err = host.Status(hosts, args)
+			}
+			
 			if err != nil {
 				fmt.Println(err)
 			}
