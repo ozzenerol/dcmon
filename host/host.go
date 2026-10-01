@@ -57,7 +57,7 @@ type HostTable struct {
 }
 
 func Load(filename string) ([]Host, error) {
-  var hosts []Host
+	var hosts []Host
 	
 	if filename == "" {
 		return hosts, fmt.Errorf("`filename` must not be empty")
