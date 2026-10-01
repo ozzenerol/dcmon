@@ -1,0 +1,38 @@
+[
+  {
+    "Hostname": "pve-node-01",
+    "Type": "PROXMOX",
+    "IP": "192.168.1.10",
+    "User": "root",
+    "Password": "changeme",
+    "Exclude": false,
+    "Flags": {
+      "NvidiaGpu": false,
+      "Docker": false
+    }
+  },
+  {
+    "Hostname": "my-vm-01",
+    "Type": "VM",
+    "IP": "192.168.1.20",
+    "User": "user",
+    "Password": "changeme",
+    "Exclude": false,
+    "Flags": {
+      "NvidiaGpu": false,
+      "Docker": true
+    }
+  },
+  {
+    "Hostname": "my-lxc-01",
+    "Type": "LXC",
+    "IP": "192.168.1.30",
+    "User": "root",
+    "Password": "changeme",
+    "Exclude": true,
+    "Flags": {
+      "NvidiaGpu": true,
+      "Docker": false
+    }
+  }
+]

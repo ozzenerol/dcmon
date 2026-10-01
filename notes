@@ -1,0 +1,39 @@
+dcmon: agentless fleet monitor over SSH
+
+> on startup, it loads all the hosts
+
+host_type = [ "PROXMOX", "VM", "LXC", "NAS"]
+
+[
+    {
+        "hostname": <string>,
+        "type": <host_type>,
+        "ip": <string>,
+        "password": <string>,
+        "flags": {
+            "gpu": <bool>,
+            "docker": <bool>
+        }
+    }
+]
+
+> on `status` command
+    1. ssh concurrently on each machine
+    2. read uptime
+    3. read cpu %, temp
+    4. read mem %
+    5. read gpu %, temp (if flags.gpu == true)
+    6. read docker stats (if flags.docker == true)
+    7. display results
+
+> on `status <hostname>`
+    1. ssh into <host.ip>
+    2. display `status` result for the given <hostname>
+
+> on `watch`
+    1. ssh concurrently on each machine
+    2. display `status` result in a live preview
+
+> on `watch <hostname>`
+    1. ssh into <host.ip>
+    2. display `status` result in a live preview
