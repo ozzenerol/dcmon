@@ -11,4 +11,14 @@ cp config.json.example config.json   # add your hosts
 go run .
 ```
 
-Commands: `status [hostname]`, `exit`.
+Commands: `status [host_type]`, `exit`.
+
+Available host types:
+```
+PROXMOX
+VM
+LXC
+NAS
+```
+
+<img width="920" height="559" alt="image" src="https://github.com/user-attachments/assets/9ce1afde-9faf-4429-90cf-bb07bff749bd" />
