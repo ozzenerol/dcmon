@@ -24,6 +24,7 @@ const (
 	ExpectedFileFormat		string		= ".json"
 
 	RowFormat							string		= "%-16s %-8s %-6s %-13s %-13s %s\n"
+	HostRowFormat					string		= "%-16s %-8s %-10s %-15s %-8s %-8s %s\n"
 
 	SystemCommandUptime		string		= `awk '{d=int($1/86400); h=int($1/3600); if (d>=1) printf "%dD", d; else printf "%dH", (h<1 ? 1 : h)}' /proc/uptime`
 	SystemCommandCPU			string = `{ head -1 /proc/stat; sleep 1; head -1 /proc/stat; } | awk '{b=$2+$3+$4+$7+$8+$9; t=b+$5+$6} NR==1{b1=b; t1=t} NR==2{printf "%d%%", (b-b1)*100/(t-t1)}'`
@@ -142,6 +143,43 @@ func StatusByHostname(hosts []Host, hostname string) error {
 	return nil
 }
 
+func Watch(hosts []Host, args []string) error {
+	return nil
+}
+
+func List(hosts []Host) error {
+	if len(hosts) == 0 {
+		return fmt.Errorf("no hosts registered")
+	}
+	
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+
+	fmt.Printf(HostRowFormat, "HOSTNAME", "TYPE", "USER", "IP", "EXCLUDE", "NVIDIA GPU", "DOCKER")
+
+	for _, h := range hosts {
+		exclude := "N"
+		if h.Exclude {
+			exclude = "Y"
+		}
+
+		nvidiaGpu := "N"
+		if h.Flags.NvidiaGpu {
+			nvidiaGpu = "Y"
+		}
+
+		docker := "N"
+		if h.Flags.Docker {
+			docker = "Y"
+		}
+
+		fmt.Fprintf(w, HostRowFormat, h.Hostname, h.Type, h.User, h.IP, exclude, nvidiaGpu, docker)
+	}
+
+	w.Flush()
+
+	return nil
+}
+
 func filterByType(hosts []Host, hostType string) ([]Host){
 	var retHosts []Host
 	for _, h := range hosts {
@@ -250,20 +288,4 @@ func printRow(row HostTable) {
 	}
 	fmt.Fprintf(w, RowFormat, row.Hostname, row.Uptime, row.CPU, row.Memory, gpu, containers)
 	w.Flush()	
-}
-
-func print(rows []HostTable) {
-  w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0) 
-  for _, r := range rows {
-    gpu := r.GPU
-    if gpu == "" {
-      gpu = "-"
-    }
-		containers := r.Containers
-		if containers == "" {
-			containers = "-"
-		}
-    fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", r.Hostname, r.Uptime, r.CPU, r.Memory, gpu, containers)
-  }
-  w.Flush()
 }

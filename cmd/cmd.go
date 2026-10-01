@@ -18,6 +18,8 @@ const (
 
 	CommandExit					= "exit"
 	CommandStatus				= "status"
+	CommandHosts				= "hosts"
+
 	FlagHostname			  = "-h"
 )
 
@@ -95,6 +97,13 @@ func Execute(config CmdConfig) {
 				err = host.Status(hosts, args)
 			}
 			
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		if command == CommandHosts {
+			err = host.List(hosts)
 			if err != nil {
 				fmt.Println(err)
 			}
