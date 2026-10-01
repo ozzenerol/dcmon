@@ -20,6 +20,8 @@ const (
 	VirtualMachine				HostType	= "VM"
 	LinuxVirtualMachine		HostType	= "LXC"
 	NetworkAreaStorage		HostType	= "NAS"
+		
+	WatchTime							uint8			= 5
 
 	ExpectedFileFormat		string		= ".json"
 
@@ -124,6 +126,7 @@ func StatusByHostname(hosts []Host, hostname string) error {
 		if h.Hostname == hosts[i].Hostname {
 			host = hosts[i]
 			found = true
+			break
 		}
 	}
 
@@ -143,7 +146,8 @@ func StatusByHostname(hosts []Host, hostname string) error {
 	return nil
 }
 
-func Watch(hosts []Host, args []string) error {
+func Watch(hosts []Host) error {
+
 	return nil
 }
 

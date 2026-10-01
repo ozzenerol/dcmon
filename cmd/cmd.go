@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 	"fmt"
+	"golang.org/x/sys/unix"
 
 	"github.com/peterh/liner"
 	"dcmon/host"
@@ -21,6 +22,13 @@ const (
 	CommandHosts				= "hosts"
 
 	FlagHostname			  = "-h"
+
+	AnsiAltScreenOn  = "\033[?1049h"
+  AnsiAltScreenOff = "\033[?1049l"
+  AnsiCursorHide   = "\033[?25l"
+  AnsiCursorShow   = "\033[?25h"
+  AnsiCursorHome   = "\033[H"
+  AnsiClearScreen  = "\033[2J"
 )
 
 type CmdConfig struct {
@@ -90,12 +98,13 @@ func Execute(config CmdConfig) {
 				args = strings.Fields(after)
 			}
 			
-			var err error
-			if len(args) > 0 && args[0] == FlagHostname {
-				err = host.StatusByHostname(hosts, args[1])
-			} else {
-				err = host.Status(hosts, args)
-			}
+			err := watch(func() error {
+				if len(args) > 0 && args[0] == FlagHostname {
+					return host.StatusByHostname(hosts, args[1])
+				}
+
+				return host.Status(hosts, args)
+			})	
 			
 			if err != nil {
 				fmt.Println(err)
@@ -116,5 +125,56 @@ func Execute(config CmdConfig) {
 		file.Truncate(0)
 		file.Seek(0, 0)
 		line.WriteHistory(file)
+	}
+}
+
+func watch(render func() error) error {
+  fd := int(os.Stdin.Fd())
+  old, err := unix.IoctlGetTermios(fd, unix.TCGETS)
+  if err != nil {
+    return err
+  }
+
+  raw := *old
+  raw.Lflag &^= unix.ICANON | unix.ECHO
+  raw.Cc[unix.VMIN] = 1
+  raw.Cc[unix.VTIME] = 0
+  if err := unix.IoctlSetTermios(fd, unix.TCSETS, &raw); err != nil {
+    return err
+  }
+  defer unix.IoctlSetTermios(fd, unix.TCSETS, old)
+
+  fmt.Print(AnsiAltScreenOn + AnsiCursorHide)
+  defer fmt.Print(AnsiCursorShow + AnsiAltScreenOff)
+
+	keys := make(chan byte) 
+	go func() {
+		buf := make([]byte, 1)
+		for {
+			if _, err := os.Stdin.Read(buf); err != nil {
+				close(keys)
+				return
+			}
+			keys <- buf[0]
+		}
+	}()
+
+	for {
+		fmt.Print(AnsiCursorHome + AnsiClearScreen)
+		if err := render(); err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("\nPress r to refresh, q to quit")
+	
+		wait:
+			for {
+				key, ok := <-keys
+				switch {
+				case !ok || key == 'q':
+					return nil
+				case key == 'r':
+					break wait
+				}
+			}
 	}
 }
