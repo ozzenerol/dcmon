@@ -146,11 +146,6 @@ func StatusByHostname(hosts []Host, hostname string) error {
 	return nil
 }
 
-func Watch(hosts []Host) error {
-
-	return nil
-}
-
 func List(hosts []Host) error {
 	if len(hosts) == 0 {
 		return fmt.Errorf("no hosts registered")
